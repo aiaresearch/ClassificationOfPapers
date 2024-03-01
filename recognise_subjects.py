@@ -1,6 +1,5 @@
 import requests
 import base64
-import json
 
 request_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
 # 二进制方式打开图片文件
