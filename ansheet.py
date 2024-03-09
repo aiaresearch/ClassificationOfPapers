@@ -8,7 +8,7 @@ import os
 os.environ["OMP_NUM_THREADS"] = '1'
 
 #a=int(input('准考证号有几位？'))
-b,c=map(int,input('第几位是班级？（两位之间用空格连接）').split())
+b,c=map(int,input('准考证号的第几位是班级？（两位之间用空格连接）').split())
 img=cv2.imread('ansheet.jpg')
 img=cv2.pyrDown(img)
 #img=cv2.pyrDown(img)
@@ -40,26 +40,25 @@ y=km_model = KMeans(n_clusters=2,n_init=1,init=np.array([[img.shape[1]/2, 0], [i
 
 labels = y.labels_
 
-#for i, label in enumerate(labels):
-#    print("Cluster:", label)
 
 
 print(xx)
-back=0
+top=img.shape[0]
 new=[]
 for i in range(0,len(labels)):
     new.append([locations[i],labels[i]])
     if labels[i]==0:
         _str='0'
-        if yy[i]>back:
-            back=yy[i]
+        
     else:
         _str='1'
         xx.remove(locations[i][0])
+        if yy[i]<top:
+            top=yy[i]+h
     cv2.putText(img_open,_str,locations[i],1,1,(255,0,0))
 
-img_open=img_open[0:back,:]
-img=img[0:back,:]
+img_open=img_open[0:top,:]
+img=img[0:top,:]
 cv2.imwrite('example.jpg',img)
 
 cv2.imshow('img',img_open)
@@ -73,7 +72,6 @@ def baidu_ocr(image_path, recognize_granularity='small'):
     
     access_token = "24.b0c4639aeba94eb2581ad45a3296592a.2592000.1711979054.282335-48885010"
     
-    # OCR
     url = "https://aip.baidubce.com/rest/2.0/ocr/v1/numbers"
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     params = {'access_token': access_token, 'recognize_granularity': recognize_granularity}
@@ -94,6 +92,7 @@ dict1=result.json()
 
 print(dict1)
 
+maxnumber=0
 clas=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
 where=[[],[],[],[],[],[],[],[],[],[]]
 numbers=['0','2','3','4','5','6','7','8','9']
@@ -106,19 +105,23 @@ for i in range(0,len(list0)):
             if str_.find(number)!= -1:
             #print(number)
                 where[int(number)].append(list0_5[j].get('location'))
+                if int(number)>maxnumber:
+                    maxnumber=int(number)
                 for x in xx:
-                    if list0_5[j].get('location').get('left') in range(x,x+w//2):
-                        cv2.putText(img_open,'here',(list0_5[j].get('location').get('left'),list0_5[j].get('location').get('height')),1,1,(255,0,0))
-                        clas[xx.index(x)].append(number)
+                    if list0_5[j].get('location').get('left') in range(x,x+w//2+1):
+                        if clas[xx.index(x)]==[]:
+                            clas[xx.index(x)].append(number)
+                        elif int(str_)>int(clas [xx.index(x)][-1]):
+                            clas[xx.index(x)].append(number)
 
 print(clas)
-column=[member for member in clas if len(member)>5]
+column=[member for member in clas if len(member)>maxnumber-2]
 print(column)
 #print(where)
 
 listb=[]
 listb0=column[b-1]
-for i in range(0,10):
+for i in range(0,maxnumber+1):
     i=str(i)
     if listb0.count(i)==0:
         listb.append(i)
